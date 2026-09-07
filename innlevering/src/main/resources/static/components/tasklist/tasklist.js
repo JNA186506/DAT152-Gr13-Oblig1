@@ -5,7 +5,7 @@ template.innerHTML = `
     href="${new URL('taskview.css', import.meta.url)}">
       <h1>Tasks</h1>
         <div id="message"><p>Waiting for server data.</p></div>
-        <div id="newtask">
+      <div id="newtask">
         <button type="button" disabled>New task</button>
       </div>
   <!-- The task list -->
@@ -67,23 +67,25 @@ class TaskList extends HTMLElement {
   #shadow
   #callbacks = new Map();
   #tasks
+  #allstatuses
   constructor() {
     super();
     this.#shadow = this.attachShadow({ mode: 'open' });
 
     this.initMaincontent();
     this.initTable();
+    this.buildDialog();
+
   }
 
-  async initMaincontent() {
+  initMaincontent() {
     const templateClone = template.content.cloneNode(true);
-
     this.#shadow.appendChild(templateClone);
   }
 
   async initTable() {
     this.#tasks = await this.getTasklist("./api/tasklist");
-    const allstatuses = await this.getStatuseslist("./api/allstatuses");
+    this.#allstatuses = await this.getStatuseslist("./api/allstatuses");
 
     const content = initContent.content.cloneNode(true);
     const tableClone = tasktable.content.cloneNode(true);
@@ -94,7 +96,30 @@ class TaskList extends HTMLElement {
     for (let task of this.#tasks) {
       this.showTask(task);
     }
-    this.setStatuseslist(allstatuses);
+    this.setStatuseslist(this.#allstatuses);
+
+    this.updateTasktext();
+  }
+
+  updateTasktext() {
+    const numberOfTasks = this.getNumtasks();
+    const message = this.#shadow.querySelector("#message");
+    const newtaskBtn = this.#shadow.querySelector("#newtask > button");
+
+    const pElm = document.createElement("p");
+    let pContent = null;
+
+    if (numberOfTasks == 0) {
+      pContent = document.createTextNode(`No tasks were found...`);
+
+      newtaskBtn.setAttribute("disabled");
+    } else {
+      pContent = document.createTextNode(`Found ${numberOfTasks} tasks.`);
+      newtaskBtn.removeAttribute("disabled");
+    }
+
+    pElm.appendChild(pContent);
+    message.replaceChildren(pElm);
   }
 
   async getTasklist(url) {
@@ -106,7 +131,7 @@ class TaskList extends HTMLElement {
       const results = await response.json();
       return results.tasks;
     } catch (e) {
-      console.log(`Something went wrong: ${e}`);
+      console.log(`Something went wrong: ${e.message}`);
     }
     return null;
   }
@@ -119,8 +144,9 @@ class TaskList extends HTMLElement {
       }
       const results = await response.json();
       return results.allstatuses;
+
     } catch (e) {
-      console.log(`Something went wrong: ${e}`);
+      console.log(`Something went wrong: ${e.message}`);
     }
     return null;
   }
@@ -156,6 +182,29 @@ class TaskList extends HTMLElement {
     const option = this.#shadow.querySelectorAll("select");
     option.forEach(o => o.innerHTML += htmlStatuses);
 
+  }
+
+  buildDialog() {
+    const dialogClone = taskboxTemplate.content.cloneNode(true);
+    const boxLocation = this.#shadow.querySelector("groupx-taskbox");
+
+    boxLocation.appendChild(dialogClone);
+    this.addNewtask();
+  }
+
+  addNewtask() {
+    const newTaskbtn = this.#shadow.querySelector("#newtask > button");
+    const dialog = this.#shadow.querySelector("dialog");
+    const spanElm = dialog.querySelector("span");
+
+    spanElm.addEventListener("click", () => {
+      dialog.close();
+    })
+
+
+    newTaskbtn.addEventListener("click", () => {
+      dialog.showModal();
+    });
   }
 
   /**
@@ -205,7 +254,7 @@ class TaskList extends HTMLElement {
    * @return {Number} - Number of tasks on display in view
    */
   getNumtasks() {
-
+    return this.#tasks.length;
   }
 }
 customElements.define("groupx-tasktemplate", TaskList);
