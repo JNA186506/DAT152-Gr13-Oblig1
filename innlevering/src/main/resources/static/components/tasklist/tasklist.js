@@ -189,10 +189,10 @@ class TaskList extends HTMLElement {
     const boxLocation = this.#shadow.querySelector("groupx-taskbox");
 
     boxLocation.appendChild(dialogClone);
-    this.addNewtask();
+    this.showDialog();
   }
 
-  addNewtask() {
+  showDialog() {
     const newTaskbtn = this.#shadow.querySelector("#newtask > button");
     const dialog = this.#shadow.querySelector("dialog");
     const spanElm = dialog.querySelector("span");
