@@ -35,7 +35,6 @@ class TaskController extends HTMLElement {
   updateTasktext() {
     const numberOfTasks = this.#taskList.getNumtasks();
     const message = this.#shadow.querySelector("#message");
-    const newtaskBtn = this.#shadow.querySelector("#newtask > button");
 
     const pElm = document.createElement("p");
     let pContent = null;
@@ -44,15 +43,19 @@ class TaskController extends HTMLElement {
       pContent = document.createTextNode(`No tasks were found...`);
     } else {
       pContent = document.createTextNode(`Found ${numberOfTasks} tasks.`);
-      newtaskBtn.removeAttribute("disabled");
     }
 
     pElm.appendChild(pContent);
     message.replaceChildren(pElm);
+  }
 
-    newtaskBtn.addEventListener("click", () => {
+  activateNewTaskbutton() {
+    const newTaskBtn = this.#shadow.querySelector("#newtask > button");
+
+    newTaskBtn.removeAttribute("disabled")
+    newTaskBtn.addEventListener("click", () => {
       this.#taskbox.getDialog().showModal();
-    }, {once: true});
+    } );
   }
 
   async #fetchTasks(url) {
@@ -62,6 +65,7 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
+      this.activateNewTaskbutton();
       return results.tasks;
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
