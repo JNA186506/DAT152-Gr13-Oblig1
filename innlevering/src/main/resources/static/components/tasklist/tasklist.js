@@ -1,4 +1,4 @@
-import { initContent, tasktable, taskrow, taskboxTemplate } from "./components.js"
+import { initContent, tasktable, taskrow } from "./components.js"
 
 /**
   * TaskList

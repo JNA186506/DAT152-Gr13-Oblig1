@@ -71,7 +71,7 @@ class TaskBox extends HTMLElement {
     }
 
     addNewTaskCallback(callback) {
-       const callbackId = "add";
+       const callbackId = Symbol("add");
        this.#newTaskCallbacks.set(callbackId, callback);
        return callbackId;
     }

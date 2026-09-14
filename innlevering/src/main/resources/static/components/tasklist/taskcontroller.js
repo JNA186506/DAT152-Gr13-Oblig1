@@ -47,8 +47,6 @@ class TaskController extends HTMLElement {
 
     pElm.appendChild(pContent);
     message.replaceChildren(pElm);
-
-
   }
 
   async #fetchTasks(url) {
