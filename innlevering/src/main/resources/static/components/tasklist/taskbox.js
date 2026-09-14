@@ -47,11 +47,13 @@ class TaskBox extends HTMLElement {
         const select = this.#shadow.querySelector("select");
         const input = this.#shadow.querySelector("input");
 
+        input.focus();
+
         spanElm.addEventListener("click", () => {
             this.#dialog.close();
         });
 
-        postBtn.addEventListener("click", () => {
+        postBtn.addEventListener("click", (e) => {
             const title = input.value;
             const selectedValue = select.options[select.value].textContent;
 
