@@ -126,7 +126,7 @@ class TaskList extends HTMLElement {
     const taskIndex = this.#tasks.indexOf(updateableTask);
     const rows = this.#shadow.querySelectorAll("tbody tr");
 
-    const row = rows[taskIndex];
+    const row = rows[rows.length - 1 - taskIndex];
 
     if (row) {
       row.querySelector("td:nth-child(2)").textContent = task.status;
