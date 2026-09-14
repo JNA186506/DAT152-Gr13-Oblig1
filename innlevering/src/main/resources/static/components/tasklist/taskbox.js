@@ -13,15 +13,26 @@ class TaskBox extends HTMLElement {
        this.buildDialog();
    }
 
+    /**
+     * Sets and updates statuses
+     *
+     * @param statuses
+     */
    setStatuses(statuses) {
        this.#allstatuses = statuses;
        this.updateStatusOptions();
    }
 
+    /**
+     * Opens the dialog window
+     */
    openDialog() {
        this.#dialog.showModal();
    }
 
+    /**
+     * Updates the selects for the dialog window
+     */
    updateStatusOptions() {
        const select = this.#shadow.querySelector("select");
        let htmlStatuses = "";
@@ -33,12 +44,19 @@ class TaskBox extends HTMLElement {
        select.innerHTML = htmlStatuses;
    }
 
+    /**
+     * Builds the dialog from template, and populates it with the showDialog method.
+     */
     buildDialog() {
        const dialogClone = taskboxTemplate.content.cloneNode(true);
        this.#shadow.appendChild(dialogClone);
        this.showDialog();
     }
 
+    /**
+     * Adds focus to the input element.
+     * Populates the dialog window with listeners.
+     */
     showDialog() {
         this.#dialog = this.#shadow.querySelector("dialog");
         const spanElm = this.#dialog.querySelector("span");

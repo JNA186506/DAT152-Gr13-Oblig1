@@ -23,6 +23,10 @@ class TaskController extends HTMLElement {
     this.#initAsyncmethods();
   }
 
+  /**
+   * Inits the async methods, ensures the taskbox and tasklist has the elements they need.
+   * @returns {Promise<void>}
+   */
   async #initAsyncmethods() {
     this.#tasks = await this.#fetchTasks("./api/tasklist")
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
@@ -32,6 +36,10 @@ class TaskController extends HTMLElement {
     this.updateTasktext();
   }
 
+  /**
+   * Updates the task text in the template element.
+   * Checks if there are tasks in the view.
+   */
   updateTasktext() {
     const numberOfTasks = this.#taskList.getNumtasks();
     const message = this.#shadow.querySelector("#message");
@@ -49,6 +57,24 @@ class TaskController extends HTMLElement {
     message.replaceChildren(pElm);
   }
 
+  /**
+   * Removes disabled attribute, adds functionality to button.
+   */
+  #newtaskButtonEvent() {
+    const newtaskBtn = this.#shadow.querySelector("#newtask > button");
+
+    newtaskBtn.removeAttribute("disabled");
+    newtaskBtn.addEventListener("click", () => {
+      this.#taskbox.openDialog();
+    });
+  }
+
+  /**
+   * Fetches all tasks from the database.
+   * handles
+   * @param url
+   * @returns {Promise<*|null>}
+   */
   async #fetchTasks(url) {
     try {
       const response = await fetch(url);
@@ -56,13 +82,7 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
-      const newtaskBtn = this.#shadow.querySelector("#newtask > button");
-      newtaskBtn.removeAttribute("disabled");
-
-      newtaskBtn.addEventListener("click", () => {
-        this.#taskbox.openDialog();
-      });
-
+      this.#newtaskButtonEvent();
       return results.tasks;
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
@@ -122,7 +142,7 @@ class TaskController extends HTMLElement {
   }
 
   /**
-   * Sends a deleterequest with a task to the server.
+   * Sends a delete request with a task to the server.
    * Method only uses the task ID to delete with the task endpoint.
    * @param data
    * @returns {Promise<void>}
