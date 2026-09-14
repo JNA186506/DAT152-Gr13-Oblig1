@@ -167,4 +167,4 @@ class TaskList extends HTMLElement {
     return this.#tasks.length;
   }
 }
-customElements.define("groupx-tasklist", TaskList);
+customElements.define("group13-tasklist", TaskList);

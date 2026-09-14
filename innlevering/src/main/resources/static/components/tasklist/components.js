@@ -8,9 +8,9 @@ template.innerHTML = `
         <button type="button" disabled>New task</button>
       </div>
   <!-- The task list -->
-  <GROUPX-TASKLIST></GROUPX-TASKLIST>
+  <group13-TASKLIST></group13-TASKLIST>
   <!-- The Modal -->
-  <GROUPX-TASKBOX></GROUPX-TASKBOX>
+  <group13-TASKBOX></group13-TASKBOX>
 
 `;
 export const initContent = document.createElement("template");

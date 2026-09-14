@@ -13,8 +13,8 @@ class TaskController extends HTMLElement {
     const templateClone = template.content.cloneNode(true);
     this.#shadow.appendChild(templateClone);
 
-    this.#taskList = this.#shadow.querySelector("groupx-tasklist");
-    this.#taskbox = this.#shadow.querySelector("groupx-taskbox");
+    this.#taskList = this.#shadow.querySelector("group13-tasklist");
+    this.#taskbox = this.#shadow.querySelector("group13-taskbox");
 
     this.#taskList.addChangestatusCallback(this.#sendPutRequest.bind(this));
     this.#taskList.addDeletetaskCallback(this.#sendDeleteRequest.bind(this));
@@ -181,4 +181,4 @@ class TaskController extends HTMLElement {
     }
   }
 }
-customElements.define("groupx-tasktemplate", TaskController);
+customElements.define("group13-tasktemplate", TaskController);

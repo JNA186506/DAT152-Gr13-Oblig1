@@ -4,7 +4,7 @@ class TaskBox extends HTMLElement {
    #shadow
    #dialog
    #allstatuses
-   #newTaskCallbacks = new Map();
+   #newTaskCallback
 
    constructor() {
        super();
@@ -53,7 +53,7 @@ class TaskBox extends HTMLElement {
             this.#dialog.close();
         });
 
-        postBtn.addEventListener("click", (e) => {
+        postBtn.addEventListener("click", () => {
             const title = input.value;
             const selectedValue = select.options[select.value].textContent;
 
@@ -61,7 +61,7 @@ class TaskBox extends HTMLElement {
                 return;
             }
 
-            this.#newTaskCallbacks.get("add")({
+            this.#newTaskCallback({
                 title: title,
                 status: selectedValue
             });
@@ -71,12 +71,7 @@ class TaskBox extends HTMLElement {
     }
 
     addNewTaskCallback(callback) {
-       const callbackId = Symbol("add");
-       this.#newTaskCallbacks.set(callbackId, callback);
-       return callbackId;
+       this.#newTaskCallback = callback;
     }
-
-
-
 }
-customElements.define("groupx-taskbox", TaskBox);
+customElements.define("group13-taskbox", TaskBox);
