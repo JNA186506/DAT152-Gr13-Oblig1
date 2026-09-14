@@ -58,6 +58,12 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
+      const newtaskBtn = this.#shadow.querySelector("#newtask > button");
+      newtaskBtn.removeAttribute("disabled");
+
+      newtaskBtn.addEventListener("click", () => {
+        this.#taskbox.getDialog().showModal();
+      });
       return results.tasks;
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
@@ -72,13 +78,6 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
-
-      const newtaskBtn = this.#shadow.querySelector("#newtask > button");
-      newtaskBtn.removeAttribute("disabled");
-
-      newtaskBtn.addEventListener("click", () => {
-        this.#taskbox.getDialog().showModal();
-      });
       return results.allstatuses;
 
     } catch (e) {
