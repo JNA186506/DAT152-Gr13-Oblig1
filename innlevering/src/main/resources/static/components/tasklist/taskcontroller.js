@@ -60,8 +60,9 @@ class TaskController extends HTMLElement {
       newtaskBtn.removeAttribute("disabled");
 
       newtaskBtn.addEventListener("click", () => {
-        this.#taskbox.getDialog().showModal();
+        this.#taskbox.openDialog();
       });
+
       return results.tasks;
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);

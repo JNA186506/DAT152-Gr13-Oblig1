@@ -4,7 +4,7 @@ class TaskBox extends HTMLElement {
    #shadow
    #dialog
    #allstatuses
-   #newTaskCallback
+   #taskboxCallbacks = new Map();
 
    constructor() {
        super();
@@ -18,8 +18,8 @@ class TaskBox extends HTMLElement {
        this.updateStatusOptions();
    }
 
-   getDialog() {
-       return this.#dialog;
+   openDialog() {
+       this.#dialog.showModal();
    }
 
    updateStatusOptions() {
@@ -42,7 +42,7 @@ class TaskBox extends HTMLElement {
     showDialog() {
         this.#dialog = this.#shadow.querySelector("dialog");
         const spanElm = this.#dialog.querySelector("span");
-        const postBtn = this.#dialog.querySelector("button");
+        const postBtn = this.#dialog.querySelectorAll("button");
 
         const select = this.#shadow.querySelector("select");
         const input = this.#shadow.querySelector("input");
@@ -53,25 +53,29 @@ class TaskBox extends HTMLElement {
             this.#dialog.close();
         });
 
-        postBtn.addEventListener("click", () => {
-            const title = input.value;
-            const selectedValue = select.options[select.value].textContent;
+        postBtn.forEach(() => {
+            addEventListener("click", () => {
+                const title = input.value;
+                const selectedValue = select.options[select.value].textContent;
 
-            if (title === "" || selectedValue === "") {
-                return;
-            }
+                if (title === "" || selectedValue === "") {
+                    return;
+                }
 
-            this.#newTaskCallback({
-                title: title,
-                status: selectedValue
-            });
-            input.value = "";
-            this.#dialog.close();
-        })
+                this.#taskboxCallbacks.forEach(callback =>
+                    callback({title: title, status: selectedValue})
+                );
+
+                input.value = "";
+                this.#dialog.close();
+            })
+        });
     }
 
     addNewTaskCallback(callback) {
-       this.#newTaskCallback = callback;
+       const callbackId = Symbol("new");
+       this.#taskboxCallbacks.set(callbackId, callback);
+       return callbackId;
     }
 }
 customElements.define("group13-taskbox", TaskBox);
