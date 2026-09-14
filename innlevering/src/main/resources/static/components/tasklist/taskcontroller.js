@@ -35,7 +35,6 @@ class TaskController extends HTMLElement {
   updateTasktext() {
     const numberOfTasks = this.#taskList.getNumtasks();
     const message = this.#shadow.querySelector("#message");
-    const newtaskBtn = this.#shadow.querySelector("#newtask > button");
 
     const pElm = document.createElement("p");
     let pContent = null;
@@ -44,15 +43,12 @@ class TaskController extends HTMLElement {
       pContent = document.createTextNode(`No tasks were found...`);
     } else {
       pContent = document.createTextNode(`Found ${numberOfTasks} tasks.`);
-      newtaskBtn.removeAttribute("disabled");
     }
 
     pElm.appendChild(pContent);
     message.replaceChildren(pElm);
 
-    newtaskBtn.addEventListener("click", () => {
-      this.#taskbox.getDialog().showModal();
-    }, {once: true});
+
   }
 
   async #fetchTasks(url) {
@@ -76,6 +72,13 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
+
+      const newtaskBtn = this.#shadow.querySelector("#newtask > button");
+      newtaskBtn.removeAttribute("disabled");
+
+      newtaskBtn.addEventListener("click", () => {
+        this.#taskbox.getDialog().showModal();
+      });
       return results.allstatuses;
 
     } catch (e) {
@@ -102,10 +105,14 @@ class TaskController extends HTMLElement {
       const response = await fetch(`./api/task`, requestSettings);
       if (response.ok) {
         console.log(`All good, task added`);
+
+        const content = await response.json();
+        const task = content.task;
+
         this.#taskList.addTask({
-          id: this.#tasks.length + 1,
-          title: data.title,
-          status: data.status,
+          id: task.id,
+          title: task.title,
+          status: task.status
         });
       } else {
         console.log(`Could not connect to server`)
@@ -123,6 +130,10 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendDeleteRequest(data) {
+    if (!data || !data.id) {
+      console.debug("Invalid data");
+    }
+
     try {
       const response = await fetch(`./api/task/${data.id}`, {"method": "DELETE"});
       if (response.ok) {

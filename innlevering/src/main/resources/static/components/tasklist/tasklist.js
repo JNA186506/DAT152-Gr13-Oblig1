@@ -72,7 +72,7 @@ class TaskList extends HTMLElement {
     }
 
     const tableBody = this.#shadow.querySelector("tbody");
-    tableBody.appendChild(rowClone);
+    tableBody.prepend(rowClone);
   }
 
   /**
@@ -92,7 +92,7 @@ class TaskList extends HTMLElement {
   }
 
   /**
-   * Add callback to run on change on change of status of a task, i.e. on change in the SELECT element
+   * Add callback to run on change of status of a task, i.e. on change in the SELECT element
    * @public
    * @param {function} callback
    */
@@ -146,7 +146,7 @@ class TaskList extends HTMLElement {
     }
 
     const rows = this.#shadow.querySelectorAll("tbody tr");
-    this.#shadow.querySelector("tbody").removeChild(rows[removedTaskIndex]);
+    this.#shadow.querySelector("tbody").removeChild(rows[rows.length - 1 - removedTaskIndex]);
   }
 
   /**
