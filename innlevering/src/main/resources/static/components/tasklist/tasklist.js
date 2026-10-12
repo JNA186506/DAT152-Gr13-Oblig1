@@ -45,7 +45,7 @@ class TaskList extends HTMLElement {
    */
   #showTask(task) {
     const rowClone = taskrow.content.cloneNode(true);
-
+	
     let cloneTData = rowClone.querySelectorAll("td");
     cloneTData[0].textContent = task.title;
     cloneTData[1].textContent = task.status;
@@ -80,14 +80,18 @@ class TaskList extends HTMLElement {
    * @param {Array} list with all possible task statuses
    */
   #setStatuseslist(list) {
-    let htmlOptions = `<option disabled selected>Modify</option>`;
-
-    list.forEach((status, index) => {
-      htmlOptions += `<option value="${index}">${status}</option>\n`;
-    });
+	const o0 = document.createElement("option");
+	o0.value = 0;
+	o0.textContent = "modify";
 
     this.#shadow.querySelectorAll("select").forEach(select => {
-      select.innerHTML = htmlOptions;
+	  select.appendChild(o0);
+      list.forEach((status, index) => {
+		const option = document.createElement("option");
+	    option.value = index;
+	    option.textContent = status;
+        select.appendChild(option);
+	  });
     });
   }
 
