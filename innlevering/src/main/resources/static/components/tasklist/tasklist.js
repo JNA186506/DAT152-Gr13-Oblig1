@@ -45,13 +45,13 @@ class TaskList extends HTMLElement {
    */
   #showTask(task) {
     const rowClone = taskrow.content.cloneNode(true);
-	
+
     let cloneTData = rowClone.querySelectorAll("td");
     cloneTData[0].textContent = task.title;
     cloneTData[1].textContent = task.status;
 
     const select = rowClone.querySelector("select");
-    if (select) {
+    if (select !== null) {
       select.addEventListener('change', (e) => {
         this.#changeCallbacks.forEach(c => {
           c({
@@ -63,7 +63,7 @@ class TaskList extends HTMLElement {
     }
 
     const rmButton = rowClone.querySelector("button");
-    if (rmButton) {
+    if (rmButton !== null) {
       rmButton.addEventListener('click', (e) => {
         this.#deleteCallbacks.forEach(c => {
           c(task);
@@ -84,15 +84,15 @@ class TaskList extends HTMLElement {
 	o0.value = 0;
 	o0.textContent = "modify";
 
-    this.#shadow.querySelectorAll("select").forEach(select => {
-	  select.appendChild(o0);
-      list.forEach((status, index) => {
-		const option = document.createElement("option");
-	    option.value = index;
-	    option.textContent = status;
-        select.appendChild(option);
-	  });
-    });
+  this.#shadow.querySelectorAll("select").forEach(select => {
+ 	  select.appendChild(o0);
+    list.forEach((status, index) => {
+  		const option = document.createElement("option");
+ 	    option.value = index;
+ 	    option.textContent = status;
+      select.appendChild(option);
+ 	  });
+  });
   }
 
   /**
@@ -123,7 +123,7 @@ class TaskList extends HTMLElement {
    */
   updateTask(task) {
     let updateableTask = this.#tasks.find(t => t.id === task.id);
-    if (!updateableTask) {
+    if (updateableTask === undefined) {
       return;
     }
     updateableTask.status = task.status;
@@ -132,7 +132,7 @@ class TaskList extends HTMLElement {
 
     const row = rows[rows.length - 1 - taskIndex];
 
-    if (row) {
+    if (row !== undefined) {
       row.querySelector("td:nth-child(2)").textContent = task.status;
     }
   }
@@ -145,9 +145,10 @@ class TaskList extends HTMLElement {
     const removedTask = this.#tasks.find(t => t.id === id);
     const removedTaskIndex = this.#tasks.indexOf(removedTask);
 
-    if (removedTask) {
-      this.#tasks.splice(removedTaskIndex, 1);
+    if (removedTask === undefined) {
+      return;
     }
+    this.#tasks.splice(removedTaskIndex, 1);
 
     const rows = this.#shadow.querySelectorAll("tbody tr");
     this.#shadow.querySelector("tbody").removeChild(rows[rows.length - 1 - removedTaskIndex]);

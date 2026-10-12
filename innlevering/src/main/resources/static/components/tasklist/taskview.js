@@ -35,7 +35,7 @@ class TaskController extends HTMLElement {
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
 
     this.#tasklist.show(this.#tasks, this.#allstatuses);
-    this.#taskbox.setStatuses(this.#allstatuses);
+    this.#taskbox.setStatusesList(this.#allstatuses);
     this.#updateTasktext();
     this.#newtaskButtonEvent();
   }
@@ -82,7 +82,7 @@ class TaskController extends HTMLElement {
   async #fetchTasks(url) {
     try {
       const response = await fetch(url);
-      if (!response.ok) {
+      if (response.ok === false) {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
@@ -96,7 +96,7 @@ class TaskController extends HTMLElement {
   async #fetchStatuses(url) {
     try {
       const response = await fetch(url);
-      if (!response.ok) {
+      if (response.ok === false) {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
@@ -124,7 +124,7 @@ class TaskController extends HTMLElement {
 
     try {
       const response = await fetch(`./api/task`, requestSettings);
-      if (response.ok) {
+      if (response.ok === true) {
         console.log(`All good, task added`);
 
         const content = await response.json();
@@ -151,13 +151,15 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendDeleteRequest(data) {
-    if (!data || !data.id) {
+    if (data === null || data === undefined ||
+        data.id === null || data.id === undefined || data.id === 0) {
       console.debug("Invalid data");
+      return;
     }
 
     try {
       const response = await fetch(`./api/task/${data.id}`, {"method": "DELETE"});
-      if (response.ok) {
+      if (response.ok === true) {
         console.log(`All good, task deleted`);
         this.#tasklist.removeTask(data.id);
       } else {
@@ -175,7 +177,8 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendPutRequest(data) {
-    if (!data || !data.status) {
+    if (data === null || data === undefined ||
+        data.status === null || data.status === undefined || data.status === "") {
       console.log("Invalid status data");
       return;
     }
@@ -190,7 +193,7 @@ class TaskController extends HTMLElement {
 
     try {
       const response = await fetch(`./api/task/${data.id}`, requestSettings);
-      if (response.ok) {
+      if (response.ok === true) {
         console.log(`All good, data put`);
         this.#tasklist.updateTask({
           id: data.id,
