@@ -19,13 +19,13 @@ class TaskList extends HTMLElement {
     this.#allstatuses = [];
   }
 
-  setData(tasks, statuses) {
+  show(tasks, statuses) {
     this.#tasks = tasks;
     this.#allstatuses = statuses;
-    this.initTable();
+    this.#initTable();
   }
 
-  initTable() {
+  #initTable() {
     const content = initContent.content.cloneNode(true);
     const tableClone = tasktable.content.cloneNode(true);
 
@@ -33,9 +33,9 @@ class TaskList extends HTMLElement {
     this.#shadow.appendChild(content);
 
     for (let task of this.#tasks) {
-      this.showTask(task);
+      this.#showTask(task);
     }
-    this.setStatuseslist(this.#allstatuses);
+    this.#setStatuseslist(this.#allstatuses);
   }
 
   /**
@@ -43,7 +43,7 @@ class TaskList extends HTMLElement {
    * @public
    * @param {Object} task - Object representing a task
    */
-  showTask(task) {
+  #showTask(task) {
     const rowClone = taskrow.content.cloneNode(true);
 
     let cloneTData = rowClone.querySelectorAll("td");
@@ -79,7 +79,7 @@ class TaskList extends HTMLElement {
    * @public
    * @param {Array} list with all possible task statuses
    */
-  setStatuseslist(list) {
+  #setStatuseslist(list) {
     let htmlOptions = `<option disabled selected>Modify</option>`;
 
     list.forEach((status, index) => {
@@ -155,8 +155,8 @@ class TaskList extends HTMLElement {
    */
   addTask(newTask) {
     this.#tasks.push(newTask);
-    this.showTask(newTask);
-    this.setStatuseslist(this.#allstatuses);
+    this.#showTask(newTask);
+    this.#setStatuseslist(this.#allstatuses);
   }
 
   /**

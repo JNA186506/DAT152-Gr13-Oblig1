@@ -1,6 +1,9 @@
 import { template } from "./components.js"
+import "./tasklist.js"
+import "./taskbox.js"
+
 class TaskController extends HTMLElement {
-  #taskList
+  #tasklist
   #taskbox
   #tasks
   #allstatuses
@@ -13,11 +16,11 @@ class TaskController extends HTMLElement {
     const templateClone = template.content.cloneNode(true);
     this.#shadow.appendChild(templateClone);
 
-    this.#taskList = this.#shadow.querySelector("group13-tasklist");
+    this.#tasklist = this.#shadow.querySelector("group13-tasklist");
     this.#taskbox = this.#shadow.querySelector("group13-taskbox");
 
-    this.#taskList.addChangestatusCallback(this.#sendPutRequest.bind(this));
-    this.#taskList.addDeletetaskCallback(this.#sendDeleteRequest.bind(this));
+    this.#tasklist.addChangestatusCallback(this.#sendPutRequest.bind(this));
+    this.#tasklist.addDeletetaskCallback(this.#sendDeleteRequest.bind(this));
     this.#taskbox.addNewTaskCallback(this.#sendPostRequest.bind(this));
 
     this.#initAsyncmethods();
@@ -31,17 +34,18 @@ class TaskController extends HTMLElement {
     this.#tasks = await this.#fetchTasks("./api/tasklist")
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
 
-    this.#taskList.setData(this.#tasks, this.#allstatuses);
+    this.#tasklist.show(this.#tasks, this.#allstatuses);
     this.#taskbox.setStatuses(this.#allstatuses);
-    this.updateTasktext();
+    this.#updateTasktext();
+    this.#newtaskButtonEvent();
   }
 
   /**
    * Updates the task text in the template element.
    * Checks if there are tasks in the view.
    */
-  updateTasktext() {
-    const numberOfTasks = this.#taskList.getNumtasks();
+  #updateTasktext() {
+    const numberOfTasks = this.#tasklist.getNumtasks();
     const message = this.#shadow.querySelector("#message");
 
     const pElm = document.createElement("p");
@@ -82,7 +86,6 @@ class TaskController extends HTMLElement {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
-      this.#newtaskButtonEvent();
       return results.tasks;
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
@@ -127,7 +130,7 @@ class TaskController extends HTMLElement {
         const content = await response.json();
         const task = content.task;
 
-        this.#taskList.addTask({
+        this.#tasklist.addTask({
           id: task.id,
           title: task.title,
           status: task.status
@@ -138,7 +141,7 @@ class TaskController extends HTMLElement {
     } catch (e) {
       console.log(`Error: ${e.message}`);
     }
-    this.updateTasktext();
+    this.#updateTasktext();
   }
 
   /**
@@ -156,14 +159,14 @@ class TaskController extends HTMLElement {
       const response = await fetch(`./api/task/${data.id}`, {"method": "DELETE"});
       if (response.ok) {
         console.log(`All good, task deleted`);
-        this.#taskList.removeTask(data.id);
+        this.#tasklist.removeTask(data.id);
       } else {
         console.log(`Could not connect to server`)
       }
     } catch (e) {
       console.log(`Error: ${e.message}`);
     }
-    this.updateTasktext();
+    this.#updateTasktext();
   }
 
   /**
@@ -189,11 +192,11 @@ class TaskController extends HTMLElement {
       const response = await fetch(`./api/task/${data.id}`, requestSettings);
       if (response.ok) {
         console.log(`All good, data put`);
-        this.#taskList.updateTask({
+        this.#tasklist.updateTask({
           id: data.id,
           status: data.status
         });
-        this.updateTasktext();
+        this.#updateTasktext();
       } else {
         console.log(`Server error: ${response.status} ${response.statusText}`);
       }
@@ -202,4 +205,4 @@ class TaskController extends HTMLElement {
     }
   }
 }
-customElements.define("group13-taskveiw", TaskController);
+customElements.define("group13-taskview", TaskController);
