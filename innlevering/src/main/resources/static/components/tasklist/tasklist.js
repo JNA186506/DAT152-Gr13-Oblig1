@@ -17,11 +17,6 @@ class TaskList extends HTMLElement {
 
     this.#tasks = [];
     this.#allstatuses = [];
-  }
-
-  show(tasks, statuses) {
-    this.#tasks = tasks;
-    this.#allstatuses = statuses;
     this.#initTable();
   }
 
@@ -32,10 +27,7 @@ class TaskList extends HTMLElement {
     content.querySelector("#tasklist").appendChild(tableClone);
     this.#shadow.appendChild(content);
 
-    for (let task of this.#tasks) {
-      this.#showTask(task);
-    }
-    this.#setStatuseslist(this.#allstatuses);
+
   }
 
   /**
@@ -43,7 +35,8 @@ class TaskList extends HTMLElement {
    * @public
    * @param {Object} task - Object representing a task
    */
-  #showTask(task) {
+  showTask(task) {
+    this.#tasks.push(task);
     const rowClone = taskrow.content.cloneNode(true);
 
     let cloneTData = rowClone.querySelectorAll("td");
@@ -73,26 +66,29 @@ class TaskList extends HTMLElement {
 
     const tableBody = this.#shadow.querySelector("tbody");
     tableBody.prepend(rowClone);
+    this.setStatuseslist(this.#allstatuses);
   }
 
   /**
    * @public
    * @param {Array} list with all possible task statuses
    */
-  #setStatuseslist(list) {
-	const o0 = document.createElement("option");
-	o0.value = 0;
-	o0.textContent = "modify";
+  setStatuseslist(list) {
+    this.#allstatuses = [...list];
+    this.#shadow.querySelectorAll("select").forEach(select => {
+      const placeholder = document.createElement("option");
+      placeholder.textContent = "Modify";
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      select.replaceChildren(placeholder);
 
-  this.#shadow.querySelectorAll("select").forEach(select => {
- 	  select.appendChild(o0);
-    list.forEach((status, index) => {
-  		const option = document.createElement("option");
- 	    option.value = index;
- 	    option.textContent = status;
-      select.appendChild(option);
- 	  });
-  });
+      this.#allstatuses.forEach((status, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.textContent = status;
+        select.appendChild(option);
+      });
+    });
   }
 
   /**
@@ -152,16 +148,6 @@ class TaskList extends HTMLElement {
 
     const rows = this.#shadow.querySelectorAll("tbody tr");
     this.#shadow.querySelector("tbody").removeChild(rows[rows.length - 1 - removedTaskIndex]);
-  }
-
-  /**
-   * Add a new task to the view
-   * @param newTask
-   */
-  addTask(newTask) {
-    this.#tasks.push(newTask);
-    this.#showTask(newTask);
-    this.#setStatuseslist(this.#allstatuses);
   }
 
   /**

@@ -10,7 +10,7 @@ class TaskBox extends HTMLElement {
        super();
        this.#shadow = this.attachShadow({mode: 'closed'});
        this.#allstatuses = [];
-       this.buildDialog();
+       this.#buildDialog();
    }
 
     /**
@@ -18,22 +18,23 @@ class TaskBox extends HTMLElement {
      *
      * @param statuses
      */
-   setStatusesList(statuses) {
+   setStatuseslist(statuses) {
        this.#allstatuses = statuses;
-       this.updateStatusOptions();
+       this.#updateStatusOptions();
    }
 
     /**
      * Opens the dialog window
      */
-   openDialog() {
+   show() {
        this.#dialog.showModal();
+       this.#dialog.querySelector("input").focus();
    }
 
     /**
      * Updates the selects for the dialog window
      */
-   updateStatusOptions() {
+   #updateStatusOptions() {
      this.#shadow.querySelectorAll("select").forEach(select => {
        const placeholder = document.createElement("option");
        placeholder.textContent = "Modify";
@@ -52,19 +53,19 @@ class TaskBox extends HTMLElement {
    }
 
     /**
-     * Builds the dialog from template, and populates it with the #show method.
+     * Builds the dialog from template, and populates it with the #initListeners method.
      */
-    buildDialog() {
+    #buildDialog() {
        const dialogClone = taskboxTemplate.content.cloneNode(true);
        this.#shadow.appendChild(dialogClone);
-       this.#show();
+       this.#initListeners();
     }
 
     /**
      * Adds focus to the input element.
      * Populates the dialog window with listeners.
      */
-    #show() {
+    #initListeners() {
         this.#dialog = this.#shadow.querySelector("dialog");
         const spanElm = this.#dialog.querySelector("span");
         const postBtn = this.#dialog.querySelectorAll("button");
@@ -72,10 +73,9 @@ class TaskBox extends HTMLElement {
         const select = this.#shadow.querySelector("select");
         const input = this.#shadow.querySelector("input");
 
-        input.focus();
 
         spanElm.addEventListener("click", () => {
-            this.#dialog.close();
+            this.close();
         });
 
         postBtn.forEach(button => {
@@ -93,12 +93,16 @@ class TaskBox extends HTMLElement {
             );
 
             input.value = "";
-            this.#dialog.close();
+            this.close();
           });
         });
     }
 
-    addNewTaskCallback(callback) {
+    close() {
+       this.#dialog.close();
+    }
+
+    addNewtaskCallback(callback) {
        const callbackId = Symbol("new");
        this.#taskboxCallbacks.set(callbackId, callback);
        return callbackId;

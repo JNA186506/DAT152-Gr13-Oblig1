@@ -21,7 +21,7 @@ class TaskController extends HTMLElement {
 
     this.#tasklist.addChangestatusCallback(this.#sendPutRequest.bind(this));
     this.#tasklist.addDeletetaskCallback(this.#sendDeleteRequest.bind(this));
-    this.#taskbox.addNewTaskCallback(this.#sendPostRequest.bind(this));
+    this.#taskbox.addNewtaskCallback(this.#sendPostRequest.bind(this));
 
     this.#initAsyncmethods();
   }
@@ -34,8 +34,9 @@ class TaskController extends HTMLElement {
     this.#tasks = await this.#fetchTasks("./api/tasklist")
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
 
-    this.#tasklist.show(this.#tasks, this.#allstatuses);
-    this.#taskbox.setStatusesList(this.#allstatuses);
+    this.#tasklist.setStatuseslist(this.#allstatuses);
+    this.#tasks.forEach(task => this.#tasklist.showTask(task));
+    this.#taskbox.setStatuseslist(this.#allstatuses);
     this.#updateTasktext();
     this.#newtaskButtonEvent();
   }
@@ -69,7 +70,7 @@ class TaskController extends HTMLElement {
 
     newtaskBtn.removeAttribute("disabled");
     newtaskBtn.addEventListener("click", () => {
-      this.#taskbox.openDialog();
+      this.#taskbox.show();
     });
   }
 
@@ -130,7 +131,7 @@ class TaskController extends HTMLElement {
         const content = await response.json();
         const task = content.task;
 
-        this.#tasklist.addTask({
+        this.#tasklist.showTask({
           id: task.id,
           title: task.title,
           status: task.status
