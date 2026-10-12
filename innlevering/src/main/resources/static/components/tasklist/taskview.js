@@ -9,7 +9,7 @@ class TaskController extends HTMLElement {
   constructor() {
     super();
 
-    this.#shadow = this.attachShadow({mode: 'open'});
+    this.#shadow = this.attachShadow({mode: 'closed'});
     const templateClone = template.content.cloneNode(true);
     this.#shadow.appendChild(templateClone);
 
@@ -202,4 +202,4 @@ class TaskController extends HTMLElement {
     }
   }
 }
-customElements.define("group13-tasktemplate", TaskController);
+customElements.define("group13-taskveiw", TaskController);
