@@ -8,14 +8,12 @@ class TaskList extends HTMLElement {
   #shadow
   #changeCallbacks = new Map();
   #deleteCallbacks = new Map();
-  #tasks
   #allstatuses
 
   constructor() {
     super();
     this.#shadow = this.attachShadow({ mode: 'closed' });
 
-    this.#tasks = [];
     this.#allstatuses = [];
     this.#initTable();
   }
@@ -26,8 +24,6 @@ class TaskList extends HTMLElement {
 
     content.querySelector("#tasklist").appendChild(tableClone);
     this.#shadow.appendChild(content);
-
-
   }
 
   /**
@@ -36,9 +32,9 @@ class TaskList extends HTMLElement {
    * @param {Object} task - Object representing a task
    */
   showTask(task) {
-    this.#tasks.push(task);
     const rowClone = taskrow.content.cloneNode(true);
-
+	rowClone.querySelector("tr").myData = task;
+	
     let cloneTData = rowClone.querySelectorAll("td");
     cloneTData[0].textContent = task.title;
     cloneTData[1].textContent = task.status;
@@ -63,7 +59,7 @@ class TaskList extends HTMLElement {
         })
       });
     }
-
+	
     const tableBody = this.#shadow.querySelector("tbody");
     tableBody.prepend(rowClone);
     this.setStatuseslist(this.#allstatuses);
@@ -118,15 +114,8 @@ class TaskList extends HTMLElement {
    * @param {Object} task - Object with attributes {'id':taskId,'status':newStatus}
    */
   updateTask(task) {
-    let updateableTask = this.#tasks.find(t => t.id === task.id);
-    if (updateableTask === undefined) {
-      return;
-    }
-    updateableTask.status = task.status;
-    const taskIndex = this.#tasks.indexOf(updateableTask);
     const rows = this.#shadow.querySelectorAll("tbody tr");
-
-    const row = rows[rows.length - 1 - taskIndex];
+	const row = Array.from(rows).find(r => r.myData.id === task.id);
 
     if (row !== undefined) {
       row.querySelector("td:nth-child(2)").textContent = task.status;
@@ -138,16 +127,9 @@ class TaskList extends HTMLElement {
    * @param {Integer} id - ID of task to remove
    */
   removeTask(id) {
-    const removedTask = this.#tasks.find(t => t.id === id);
-    const removedTaskIndex = this.#tasks.indexOf(removedTask);
-
-    if (removedTask === undefined) {
-      return;
-    }
-    this.#tasks.splice(removedTaskIndex, 1);
-
     const rows = this.#shadow.querySelectorAll("tbody tr");
-    this.#shadow.querySelector("tbody").removeChild(rows[rows.length - 1 - removedTaskIndex]);
+	const row = Array.from(rows).find(r => r.myData.id === id);
+    this.#shadow.querySelector("tbody").removeChild(row);
   }
 
   /**
@@ -155,7 +137,7 @@ class TaskList extends HTMLElement {
    * @return {Number} - Number of tasks on display in view
    */
   getNumtasks() {
-    return this.#tasks.length;
+    return this.#shadow.querySelectorAll('tbody tr').length;
   }
 }
 customElements.define("group13-tasklist", TaskList);

@@ -11,7 +11,7 @@ class TaskController extends HTMLElement {
 
   constructor() {
     super();
-
+	
     this.#shadow = this.attachShadow({mode: 'closed'});
     const templateClone = template.content.cloneNode(true);
     this.#shadow.appendChild(templateClone);
@@ -46,9 +46,10 @@ class TaskController extends HTMLElement {
    * Checks if there are tasks in the view.
    */
   #updateTasktext() {
-    const numberOfTasks = this.#tasklist.getNumtasks();
+	const boundFn = this.#tasklist.getNumtasks.bind(this.#tasklist);
+	const numberOfTasks = boundFn();
     const message = this.#shadow.querySelector("#message");
-
+	
     const pElm = document.createElement("p");
     let pContent = null;
 
@@ -157,7 +158,7 @@ class TaskController extends HTMLElement {
       console.debug("Invalid data");
       return;
     }
-
+	
     try {
       const response = await fetch(`./api/task/${data.id}`, {"method": "DELETE"});
       if (response.ok === true) {
