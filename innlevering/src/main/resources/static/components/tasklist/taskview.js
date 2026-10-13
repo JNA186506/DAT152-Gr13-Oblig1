@@ -1,18 +1,18 @@
-import { template } from "./components.js"
-import "./tasklist.js"
-import "./taskbox.js"
+import { template } from "./components.js";
+import "./tasklist.js";
+import "./taskbox.js";
 
 class TaskController extends HTMLElement {
-  #tasklist
-  #taskbox
-  #tasks
-  #allstatuses
-  #shadow
+  #tasklist;
+  #taskbox;
+  #tasks;
+  #allstatuses;
+  #shadow;
 
   constructor() {
     super();
-	
-    this.#shadow = this.attachShadow({mode: 'closed'});
+
+    this.#shadow = this.attachShadow({ mode: "closed" });
     const templateClone = template.content.cloneNode(true);
     this.#shadow.appendChild(templateClone);
 
@@ -31,11 +31,11 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #initAsyncmethods() {
-    this.#tasks = await this.#fetchTasks("./api/tasklist")
+    this.#tasks = await this.#fetchTasks("./api/tasklist");
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
 
     this.#tasklist.setStatuseslist(this.#allstatuses);
-    this.#tasks.forEach(task => this.#tasklist.showTask(task));
+    this.#tasks.forEach((task) => this.#tasklist.showTask(task));
     this.#taskbox.setStatuseslist(this.#allstatuses);
     this.#updateTasktext();
     this.#newtaskButtonEvent();
@@ -46,10 +46,9 @@ class TaskController extends HTMLElement {
    * Checks if there are tasks in the view.
    */
   #updateTasktext() {
-	const boundFn = this.#tasklist.getNumtasks.bind(this.#tasklist);
-	const numberOfTasks = boundFn();
+    const numberOfTasks = this.#tasklist.getNumtasks();
     const message = this.#shadow.querySelector("#message");
-	
+
     const pElm = document.createElement("p");
     let pContent = null;
 
@@ -103,7 +102,6 @@ class TaskController extends HTMLElement {
       }
       const results = await response.json();
       return results.allstatuses;
-
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
     }
@@ -117,11 +115,11 @@ class TaskController extends HTMLElement {
    */
   async #sendPostRequest(data) {
     const requestSettings = {
-      "method": "POST",
-      "headers": {"Content-Type": "application/json; charset=utf-8"},
-      "body": JSON.stringify(data),
-      "cache": "no-cache",
-      "redirect": "error"
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(data),
+      cache: "no-cache",
+      redirect: "error",
     };
 
     try {
@@ -135,10 +133,10 @@ class TaskController extends HTMLElement {
         this.#tasklist.showTask({
           id: task.id,
           title: task.title,
-          status: task.status
+          status: task.status,
         });
       } else {
-        console.log(`Could not connect to server`)
+        console.log(`Could not connect to server`);
       }
     } catch (e) {
       console.log(`Error: ${e.message}`);
@@ -153,19 +151,26 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendDeleteRequest(data) {
-    if (data === null || data === undefined ||
-        data.id === null || data.id === undefined || data.id === 0) {
+    if (
+      data === null ||
+      data === undefined ||
+      data.id === null ||
+      data.id === undefined ||
+      data.id === 0
+    ) {
       console.debug("Invalid data");
       return;
     }
-	
+
     try {
-      const response = await fetch(`./api/task/${data.id}`, {"method": "DELETE"});
+      const response = await fetch(`./api/task/${data.id}`, {
+        method: "DELETE",
+      });
       if (response.ok === true) {
         console.log(`All good, task deleted`);
         this.#tasklist.removeTask(data.id);
       } else {
-        console.log(`Could not connect to server`)
+        console.log(`Could not connect to server`);
       }
     } catch (e) {
       console.log(`Error: ${e.message}`);
@@ -179,18 +184,23 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendPutRequest(data) {
-    if (data === null || data === undefined ||
-        data.status === null || data.status === undefined || data.status === "") {
+    if (
+      data === null ||
+      data === undefined ||
+      data.status === null ||
+      data.status === undefined ||
+      data.status === ""
+    ) {
       console.log("Invalid status data");
       return;
     }
 
     const requestSettings = {
-      "method": "PUT",
-      "headers": {"Content-Type": "application/json; charset=utf-8"},
-      "body": JSON.stringify({status: data.status}),
-      "cache": "no-cache",
-      "redirect": "error"
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ status: data.status }),
+      cache: "no-cache",
+      redirect: "error",
     };
 
     try {
@@ -199,7 +209,7 @@ class TaskController extends HTMLElement {
         console.log(`All good, data put`);
         this.#tasklist.updateTask({
           id: data.id,
-          status: data.status
+          status: data.status,
         });
         this.#updateTasktext();
       } else {
