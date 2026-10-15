@@ -6,6 +6,7 @@ import { initContent, tasktable, taskrow } from "./components.js";
  */
 class TaskList extends HTMLElement {
   #shadow;
+  #rows = new Map();
   #changeCallbacks = new Map();
   #deleteCallbacks = new Map();
   #allstatuses;
@@ -32,8 +33,9 @@ class TaskList extends HTMLElement {
    * @param {Object} task - Object representing a task
    */
   showTask(task) {
+    this.removeTask(task.id);
     const rowClone = taskrow.content.cloneNode(true);
-    rowClone.querySelector("tr").myData = task;
+    const row = rowClone.querySelector("tr");
 
     let cloneTData = rowClone.querySelectorAll("td");
     cloneTData[0].textContent = task.title;
@@ -62,6 +64,7 @@ class TaskList extends HTMLElement {
 
     const tableBody = this.#shadow.querySelector("tbody");
     tableBody.prepend(rowClone);
+    this.#rows.set(task.id, row);
     this.setStatuseslist(this.#allstatuses);
   }
 
@@ -114,8 +117,7 @@ class TaskList extends HTMLElement {
    * @param {Object} task - Object with attributes {'id':taskId,'status':newStatus}
    */
   updateTask(task) {
-    const rows = this.#shadow.querySelectorAll("tbody tr");
-    const row = Array.from(rows).find((r) => r.myData.id === task.id);
+    const row = this.#rows.get(task.id);
 
     if (row !== undefined) {
       row.querySelector("td:nth-child(2)").textContent = task.status;
@@ -127,9 +129,11 @@ class TaskList extends HTMLElement {
    * @param {Integer} id - ID of task to remove
    */
   removeTask(id) {
-    const rows = this.#shadow.querySelectorAll("tbody tr");
-    const row = Array.from(rows).find((r) => r.myData.id === id);
-    this.#shadow.querySelector("tbody").removeChild(row);
+    const row = this.#rows.get(id);
+    if (row !== undefined) {
+      row.remove();
+      this.#rows.delete(id);
+    }
   }
 
   /**
@@ -137,7 +141,7 @@ class TaskList extends HTMLElement {
    * @return {Number} - Number of tasks on display in view
    */
   getNumtasks() {
-    return this.#shadow.querySelectorAll("tbody tr").length;
+    return this.#rows.size;
   }
 }
 customElements.define("group13-tasklist", TaskList);

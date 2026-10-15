@@ -83,8 +83,7 @@ class TaskBox extends HTMLElement {
             const title = input.value.trim();
             const status = this.#allstatuses[Number(select.value)];
 
-            if (title === "" || select.selectedIndex <= 0 ||
-                status === undefined) {
+            if (title === "" || select.selectedIndex <= 0 || status === undefined) {
               return;
             }
 

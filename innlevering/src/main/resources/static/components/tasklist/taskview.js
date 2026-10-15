@@ -5,7 +5,6 @@ import "./taskbox.js";
 class TaskController extends HTMLElement {
   #tasklist;
   #taskbox;
-  #tasks;
   #allstatuses;
   #shadow;
 
@@ -31,14 +30,27 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #initAsyncmethods() {
-    this.#tasks = await this.#fetchTasks("./api/tasklist");
+    const tasks = await this.#fetchTasks("./api/tasklist");
     this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
 
     this.#tasklist.setStatuseslist(this.#allstatuses);
-    this.#tasks.forEach((task) => this.#tasklist.showTask(task));
+    const taskMap = this.#buildMap(tasks);
+    taskMap.forEach(task => this.#tasklist.showTask(task));
     this.#taskbox.setStatuseslist(this.#allstatuses);
     this.#updateTasktext();
     this.#newtaskButtonEvent();
+  }
+
+  #buildMap(tasks) {
+    let taskMap = new Map();
+
+    tasks.forEach(task => {
+      if (!taskMap.has(task.id)) {
+        taskMap.set(task.id, task);
+      }
+    });
+
+    return taskMap;
   }
 
   /**
