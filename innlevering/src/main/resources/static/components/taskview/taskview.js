@@ -1,8 +1,8 @@
-import { template } from "./components.js";
-import "./tasklist.js";
-import "./taskbox.js";
+import { template } from "./taskview-components.js";
+import "../tasklist/tasklist.js";
+import "../taskbox/taskbox.js";
 
-class TaskController extends HTMLElement {
+class TaskView extends HTMLElement {
   #tasklist;
   #taskbox;
   #allstatuses;
@@ -25,17 +25,36 @@ class TaskController extends HTMLElement {
     this.#initAsyncmethods();
   }
 
+  #serviceUrl(endpoint) {
+    const base = this.dataset.serviceurl.replace(/\/+$/, "");
+    return `${base}/${endpoint}`;
+  }
+
   /**
    * Inits the async methods, ensures the taskbox and tasklist has the elements they need.
    * @returns {Promise<void>}
    */
   async #initAsyncmethods() {
-    const tasks = await this.#fetchTasks("./api/tasklist");
-    this.#allstatuses = await this.#fetchStatuses("./api/allstatuses");
+    const tasks = await this.#fetchTasks();
 
+    if (tasks === null) {
+      // Could benefit with a more robust handler
+      console.log("Could not load tasks, please reload page.");
+      return;
+    }
+
+    const statuses = await this.#fetchStatuses();
+
+    if (tasks === null) {
+      // Could benefit with a more robust handler
+      console.log("Could not load statuses, please reload page.");
+      return;
+    }
+
+    this.#allstatuses = statuses;
     this.#tasklist.setStatuseslist(this.#allstatuses);
     const taskMap = this.#buildMap(tasks);
-    taskMap.forEach(task => this.#tasklist.showTask(task));
+    taskMap.forEach((task) => this.#tasklist.showTask(task));
     this.#taskbox.setStatuseslist(this.#allstatuses);
     this.#updateTasktext();
     this.#newtaskButtonEvent();
@@ -44,7 +63,7 @@ class TaskController extends HTMLElement {
   #buildMap(tasks) {
     let taskMap = new Map();
 
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (!taskMap.has(task.id)) {
         taskMap.set(task.id, task);
       }
@@ -92,28 +111,33 @@ class TaskController extends HTMLElement {
    * @param url
    * @returns {Promise<*|null>}
    */
-  async #fetchTasks(url) {
+  async #fetchTasks() {
     try {
-      const response = await fetch(url);
+      const response = await fetch(this.#serviceUrl("tasklist"));
       if (response.ok === false) {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
-      return results.tasks;
+
+      if (results.responseStatus === true) {
+        return results.tasks;
+      }
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
     }
     return null;
   }
 
-  async #fetchStatuses(url) {
+  async #fetchStatuses() {
     try {
-      const response = await fetch(url);
+      const response = await fetch(this.#serviceUrl("allstatuses"));
       if (response.ok === false) {
         throw new Error(`Response status: ${response.status}`);
       }
       const results = await response.json();
-      return results.allstatuses;
+      if (results.responseStatus === true) {
+        return results.allstatuses;
+      }
     } catch (e) {
       console.log(`Something went wrong: ${e.message}`);
     }
@@ -135,25 +159,25 @@ class TaskController extends HTMLElement {
     };
 
     try {
-      const response = await fetch(`./api/task`, requestSettings);
-      if (response.ok === true) {
-        console.log(`All good, task added`);
+      const response = await fetch(this.#serviceUrl("task"), requestSettings);
+      if (response.ok === false) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
 
-        const content = await response.json();
+      const content = await response.json();
+
+      if (content.responseStatus === true) {
         const task = content.task;
-
         this.#tasklist.showTask({
           id: task.id,
           title: task.title,
           status: task.status,
         });
-      } else {
-        console.log(`Could not connect to server`);
       }
+      this.#updateTasktext();
     } catch (e) {
-      console.log(`Error: ${e.message}`);
+      console.log(`Something went wrong: ${e.message}`);
     }
-    this.#updateTasktext();
   }
 
   /**
@@ -163,31 +187,24 @@ class TaskController extends HTMLElement {
    * @returns {Promise<void>}
    */
   async #sendDeleteRequest(data) {
-    if (
-      data === null ||
-      data === undefined ||
-      data.id === null ||
-      data.id === undefined ||
-      data.id === 0
-    ) {
-      console.debug("Invalid data");
-      return;
-    }
-
     try {
-      const response = await fetch(`./api/task/${data.id}`, {
+      const response = await fetch(`${this.#serviceUrl(`task/${data.id}`)}`, {
         method: "DELETE",
       });
-      if (response.ok === true) {
-        console.log(`All good, task deleted`);
+
+      if (response.ok === false) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const content = await response.json();
+
+      if (content.responseStatus === true) {
         this.#tasklist.removeTask(data.id);
-      } else {
-        console.log(`Could not connect to server`);
+        this.#updateTasktext();
       }
     } catch (e) {
-      console.log(`Error: ${e.message}`);
+      console.log(e);
     }
-    this.#updateTasktext();
   }
 
   /**
@@ -216,20 +233,28 @@ class TaskController extends HTMLElement {
     };
 
     try {
-      const response = await fetch(`./api/task/${data.id}`, requestSettings);
-      if (response.ok === true) {
-        console.log(`All good, data put`);
+      const response = await fetch(
+        `${this.#serviceUrl(`task/${data.id}`)}`,
+        requestSettings,
+      );
+
+      if (response.ok === false) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const content = await response.json();
+
+      if (content.responseStatus === true) {
         this.#tasklist.updateTask({
-          id: data.id,
-          status: data.status,
+          id: content.id,
+          status: content.status,
         });
+
         this.#updateTasktext();
-      } else {
-        console.log(`Server error: ${response.status} ${response.statusText}`);
       }
     } catch (e) {
       console.log(`Error: ${e.message}`);
     }
   }
 }
-customElements.define("group13-taskview", TaskController);
+customElements.define("group13-taskview", TaskView);

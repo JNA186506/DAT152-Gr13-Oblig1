@@ -1,4 +1,4 @@
-import { initContent, tasktable, taskrow } from "./components.js";
+import { initContent, tasktable, taskrow } from "./tasklist-components.js";
 
 /**
  * TaskList
@@ -44,11 +44,20 @@ class TaskList extends HTMLElement {
     const select = rowClone.querySelector("select");
     if (select !== null) {
       select.addEventListener("change", (e) => {
+        if (
+          window.confirm("Are you sure you want to change the task status?") ===
+          false
+        ) {
+          this.setStatuseslist(this.#allstatuses);
+          return;
+        }
         this.#changeCallbacks.forEach((c) => {
           c({
             id: task.id,
             status: this.#allstatuses[e.target.value],
           });
+
+          this.setStatuseslist(this.#allstatuses);
         });
       });
     }
@@ -56,6 +65,12 @@ class TaskList extends HTMLElement {
     const rmButton = rowClone.querySelector("button");
     if (rmButton !== null) {
       rmButton.addEventListener("click", (e) => {
+        if (
+          window.confirm("Are you sure you want to remove the task?") === false
+        ) {
+          return;
+        }
+
         this.#deleteCallbacks.forEach((c) => {
           c(task);
         });
@@ -76,7 +91,7 @@ class TaskList extends HTMLElement {
     this.#allstatuses = [...list];
     this.#shadow.querySelectorAll("select").forEach((select) => {
       const placeholder = document.createElement("option");
-      placeholder.textContent = "Modify";
+      placeholder.textContent = "<Modify>";
       placeholder.disabled = true;
       placeholder.selected = true;
       select.replaceChildren(placeholder);
